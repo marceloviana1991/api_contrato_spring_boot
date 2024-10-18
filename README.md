@@ -96,7 +96,7 @@ Para testar os configurações do projeto, nessa etapa foi feita uma inserção 
 
 Nessa etapa cria-se o CRUD da entidade imóveis com regras de validação. Para a obtenção dos endereços utiliza-se uma API externa chamada viacep. A API externa viacep atua, de modo que, recebe um cep e devolve os dados do endereço. Por tanto, definiu-se que no método post do cadastro de imóveis seria passado somente o tipo do imóvel, o cep e o número. A partir daí, obtém-se os dados de bairro, rua, cidade e estado por meio da API externa. Vale ressaltar que para viabilizar a manipulação dos dados obtidos por meio da API externa necessita-se da utilização de biblioteca de serialização. A biblioteca de serialização tem a função de converter os dados obtidos por meio da API externa para um DTO java.
 
-**(A) Método POST**
+**(A) Método POST imóveis**
 
 Parâmetros BodyRequest
 - tipoImovel (EnumType.STRING)
@@ -120,7 +120,7 @@ Regras de validação
 - **NotNull:** tipoImovel
 - **Regex:** cep (8 dígitos de número decimal)
 
-**(B) Método GET**
+**(B) Método GET imóveis**
 
 PathVariable
 - id (opcional)
@@ -146,7 +146,7 @@ Parâmetros BodyResponse
 - estado (String)
 - cep (String)
 
-**(C) Método PUT**
+**(C) Método PUT imóveis**
 
 Parâmetros BodyRequest
 - id (Long)
@@ -173,7 +173,7 @@ Parâmetros BodyResponse
 - estado (String)
 - cep (String)
 
-**(D) Método DELETE**
+**(D) Método DELETE imóveis**
 
 PathVariable
 - id
@@ -181,3 +181,75 @@ PathVariable
 O método delete implementa conceito de exclusão lógica por meio de atributo denominado ativo que recebe variável do tipo boolean. Além de ter a função de definir a exclusão da própria entidade imóvel, por meio de uma reação em cadeia, o atributo também tem a função de excluir as entidades dependentes da entidade imóvel, funcionando como algo semelhante a uma exclusão em cascata.
 
 ### 3. Criação do sistema de cadastro contratos
+
+Nessa etapa cria-se o CRUD da entidade contratos de aluguel com regras de validação.
+
+**(A) Método POST contratos**
+
+Parâmetros BodyRequest
+- dataInicio (LocalDate "yyyy-MM-dd")
+- dataFinalizacao (LocalDate "yyyy-MM-dd")
+- mensalidade (Integer)
+- iptu (Integer)
+- idImovel (Long)
+
+Parâmetros BodyResponse
+- id (Long)
+- dataInicio (LocalDate "yyyy-MM-dd")
+- dataFinalizacao (LocalDate "yyyy-MM-dd")
+- mensalidade (Integer)
+- iptu (Integer)
+- idImovel (Long)
+
+Regras de validação
+- **NotNull:** Todos atributos
+
+**(B) Método GET contratos**
+
+PathVariable
+- id (opcional)
+
+Utilizando PathVariable chama o método detalhar (retorna objeto) e sem utilizar PathVariable chama método listar (retorna lista).
+
+No método listar utiliza-se componente de paginação.
+
+QueryParameters
+- size (quantidade de itens por página)
+- page (número da página)
+- sort (ordenação)
+
+Para facilitar as pesquisas, o parâmetro sort (ordenação) é definido por padrão com ordenação respectivamente por data de inicio e data de finalização.
+
+Parâmetros BodyResponse
+- id (Long)
+- dataInico (LocalDate "yyyy-MM-dd")
+- dataFinalizacao (LocalDate "yyyy-MM-dd")
+- mensalidade (Integer)
+- iptu (Integer)
+- idImovel (Long)
+
+**(C) Método PUT contratos**
+
+Parâmetros BodyRequest
+- id (Long)
+- dataInicio (LocalDate "yyyy-MM-dd")
+- dataFinalizacao (LocalDate "yyyy-MM-dd")
+- mensalidade (Integer)
+- iptu (Integer)
+
+Regras de validação
+- **NotNull:** id
+
+Caso de parâmetros não passados no BodyRequest o atributo permanece inalterado.
+
+Parâmetros BodyResponse
+- id (Long)
+- dataInicio (LocalDate "yyyy-MM-dd")
+- dataFinalizacao (LocalDate "yyyy-MM-dd")
+- mensalidade (Integer)
+- iptu (Integer)
+- idImovel (Long)
+
+
+
+

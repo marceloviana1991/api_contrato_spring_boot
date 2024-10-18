@@ -7,7 +7,7 @@ import contrato.api.dto.imovel.DadosCadastroImovel;
 import contrato.api.dto.imovel.DadosDetalhamentoImovel;
 import contrato.api.model.Imovel;
 import contrato.api.repository.ImovelRepository;
-import contrato.api.service.consumo.ConsumoViaCepApi;
+import contrato.api.service.viacep.ConsumoViaCepApi;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

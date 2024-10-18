@@ -1,4 +1,4 @@
-package contrato.api.service.consumo;
+package contrato.api.service.viacep;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import contrato.api.dto.imovel.DadosCadastroEndereco;
