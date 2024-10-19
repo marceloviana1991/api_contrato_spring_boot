@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -27,38 +29,41 @@ public class ImovelController {
 
     @PostMapping
     @Transactional
-    public DadosDetalhamentoImovel cadastrar(@RequestBody @Valid DadosCadastroImovel dadosCadastroImovel) {
+    public ResponseEntity<DadosDetalhamentoImovel> cadastrar(
+            @RequestBody @Valid DadosCadastroImovel dadosCadastroImovel, UriComponentsBuilder uriComponentsBuilder) {
         DadosCadastroEndereco dadosCadastroEndereco = ConsumoViaCepApi.obterDados(dadosCadastroImovel.cep());
         Imovel imovel = new Imovel(dadosCadastroImovel, dadosCadastroEndereco);
         imovelRepository.save(imovel);
-        return new DadosDetalhamentoImovel(imovel);
+        var uri = uriComponentsBuilder.path("/imoveis/{id}").buildAndExpand(imovel.getId()).toUri();
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoImovel(imovel));
     }
 
     @GetMapping
-    public List<DadosDetalhamentoImovel> listar(
+    public ResponseEntity<List<DadosDetalhamentoImovel>> listar(
             @PageableDefault(sort = {"bairro", "rua", "numero"}) Pageable pageable) {
         Page<Imovel> imovelList = imovelRepository.findAllByAtivoTrue(pageable);
-        return imovelList.stream().map(DadosDetalhamentoImovel::new).toList();
+        return ResponseEntity.ok(imovelList.stream().map(DadosDetalhamentoImovel::new).toList());
     }
 
     @GetMapping("/{id}")
-    public DadosDetalhamentoImovel detalhar(@PathVariable Long id) {
+    public ResponseEntity<DadosDetalhamentoImovel> detalhar(@PathVariable Long id) {
         Imovel imovel = imovelRepository.getReferenceById(id);
-        return new DadosDetalhamentoImovel(imovel);
+        return ResponseEntity.ok(new DadosDetalhamentoImovel(imovel));
     }
 
     @PutMapping
     @Transactional
-    public DadosDetalhamentoImovel atualizar(@RequestBody @Valid DadosAtualizacaoImovel dadosAtualizacaoImovel) {
+    public ResponseEntity<DadosDetalhamentoImovel> atualizar(@RequestBody @Valid DadosAtualizacaoImovel dadosAtualizacaoImovel) {
         Imovel imovel = imovelRepository.getReferenceById(dadosAtualizacaoImovel.id());
         imovel.atualizarDados(dadosAtualizacaoImovel);
-        return new DadosDetalhamentoImovel(imovel);
+        return ResponseEntity.ok(new DadosDetalhamentoImovel(imovel));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir (@PathVariable Long id) {
+    public ResponseEntity<?> excluir (@PathVariable Long id) {
         Imovel imovel = imovelRepository.getReferenceById(id);
         imovel.desativar();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 
@@ -29,31 +31,33 @@ public class ContratoController {
 
     @PostMapping
     @Transactional
-    public DadosDetalhamentoContrato cadastrar(@RequestBody @Valid DadosCadastroContrato dadosCadastroContrato) {
+    public ResponseEntity<DadosDetalhamentoContrato> cadastrar(
+            @RequestBody @Valid DadosCadastroContrato dadosCadastroContrato, UriComponentsBuilder uriComponentsBuilder) {
         Imovel imovel = imovelRepository.getReferenceById(dadosCadastroContrato.idImovel());
         Contrato contrato = new Contrato(dadosCadastroContrato, imovel);
         contratoRepository.save(contrato);
-        return new DadosDetalhamentoContrato(contrato);
+        var uri = uriComponentsBuilder.path("/contratos/{id}").buildAndExpand(contrato.getId()).toUri();
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoContrato(contrato));
     }
 
     @GetMapping
-    public List<DadosDetalhamentoContrato> listar(@PageableDefault(sort = {"dataInicio", "dataFinalizacao"})
+    public ResponseEntity<List<DadosDetalhamentoContrato>> listar(@PageableDefault(sort = {"dataInicio", "dataFinalizacao"})
                                                       Pageable pageable) {
         Page<Contrato> contratoList = contratoRepository.contratosAtivos(pageable);
-        return contratoList.stream().map(DadosDetalhamentoContrato::new).toList();
+        return ResponseEntity.ok(contratoList.stream().map(DadosDetalhamentoContrato::new).toList());
     }
 
     @GetMapping("/{id}")
-    public DadosDetalhamentoContrato detalhar(@PathVariable Long id) {
+    public ResponseEntity<DadosDetalhamentoContrato> detalhar(@PathVariable Long id) {
         Contrato contrato = contratoRepository.getReferenceById(id);
-        return new DadosDetalhamentoContrato(contrato);
+        return ResponseEntity.ok(new DadosDetalhamentoContrato(contrato));
     }
 
     @PutMapping
     @Transactional
-    public DadosDetalhamentoContrato atualizar(@RequestBody @Valid DadosAtualizacaoContrato dadosAtualizacaoContrato) {
+    public ResponseEntity<DadosDetalhamentoContrato> atualizar(@RequestBody @Valid DadosAtualizacaoContrato dadosAtualizacaoContrato) {
         Contrato contrato = contratoRepository.getReferenceById(dadosAtualizacaoContrato.id());
         contrato.atualizarDados(dadosAtualizacaoContrato);
-        return new DadosDetalhamentoContrato(contrato);
+        return ResponseEntity.ok(new DadosDetalhamentoContrato(contrato));
     }
 }

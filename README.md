@@ -14,17 +14,17 @@
  
  Cada registro deve conter:
  
-(A) Imóvel
+**(A) Imóvel**
 - Tipo (informa se o imóvel é casa, apartamento, galpão, sala comercial ou terreno);
 - Localização (informa bairro, rua, número, cidade e CEP).
 
-(B) Aluguel
+**(B) Aluguel**
 - Data de início;
 - Data de finalização;
 - Valor de mensalidade;
 - Valor de IPTU.
 
-(C) Despesas
+**(C) Despesas**
 - Data;
 - Valor;
 - Descrição.
@@ -180,7 +180,7 @@ PathVariable
 
 O método delete implementa conceito de exclusão lógica por meio de atributo denominado ativo que recebe variável do tipo boolean. Além de ter a função de definir a exclusão da própria entidade imóvel, por meio de uma reação em cadeia, o atributo também tem a função de excluir as entidades dependentes da entidade imóvel, funcionando como algo semelhante a uma exclusão em cascata.
 
-### 3. Criação do sistema de cadastro contratos
+### 3. Criação do sistema de cadastro de contratos
 
 Nessa etapa cria-se o CRUD da entidade contratos de aluguel com regras de validação.
 
@@ -250,6 +250,87 @@ Parâmetros BodyResponse
 - iptu (Integer)
 - idImovel (Long)
 
+### 4. Criação do sistema de cadastro de despesas
 
+Nessa etapa cria-se o CRUD da entidade despesas de manutenção com regras de validação.
 
+**(A) Método POST despesas**
 
+Parâmetros BodyRequest
+- data (LocalDate "yyyy-MM-dd")
+- valor (Integer)
+- descricao (String)
+- idImovel (Long)
+
+Parâmetros BodyResponse
+- id (Long)
+- data (LocalDate "yyyy-MM-dd")
+- valor (Integer)
+- descricao (String)
+- idImovel (Long)
+
+Regras de validação
+- **NotNull:** data, valor, idImovel
+- **NotBlank** descricao
+
+**(B) Método GET despesas**
+
+PathVariable
+- id (opcional)
+
+Utilizando PathVariable chama o método detalhar (retorna objeto) e sem utilizar PathVariable chama método listar (retorna lista).
+
+No método listar utiliza-se componente de paginação.
+
+QueryParameters
+- size (quantidade de itens por página)
+- page (número da página)
+- sort (ordenação)
+
+Parâmetros BodyResponse
+- id (Long)
+- data (LocalDate "yyyy-MM-dd")
+- valor (Integer)
+- descricao (String)
+- idImovel (Long)
+
+**(C) Método PUT despesas**
+
+Parâmetros BodyRequest
+- id (Long)
+- data (LocalDate "yyyy-MM-dd")
+- valor (Integer)
+- descricao (String)
+- idImovel (Long)
+
+Regras de validação
+- **NotNull:** id
+
+Caso de parâmetros não passados no BodyRequest o atributo permanece inalterado.
+
+Parâmetros BodyResponse
+- id (Long)
+- data (LocalDate "yyyy-MM-dd")
+- valor (Integer)
+- descricao (String)
+- idImovel (Long)
+
+### 5. Padronização de retornos
+
+**(A) Confirmação**
+- **204 No Content:** DELETE;
+- **200 ok:** PUT, GET;
+- **201 created:** POST.
+
+No método POST o cabeçalho da resposta devolve url de acesso ao detalhamento do objeto criado.
+
+**(B) Erro no servidor**
+Para erros do servidor utiliza-se o retorno padrão do spring boot, fazendo somente uma configuração para que a stacktrace do erro não seja retornada no corpo da resposta. Essa configuração evita a exposição de informações desnecessariamente.
+
+**(C) Erro do cliente**
+Pra que não fosse feita uma configuração de tratamento de erros diferente para cada método, o tratamento desse tipo de erro foi feito em uma classe que trata erro por tipo de exceção.
+
+- **404 Not found:** EntityNotFoundException
+- **400 Bad request:** MethodArgumentNotValidException
+
+ 
