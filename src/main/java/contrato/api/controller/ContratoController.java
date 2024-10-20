@@ -3,6 +3,7 @@ package contrato.api.controller;
 import contrato.api.dto.contrato.DadosAtualizacaoContrato;
 import contrato.api.dto.contrato.DadosCadastroContrato;
 import contrato.api.dto.contrato.DadosDetalhamentoContrato;
+import contrato.api.infra.exception.ValidacaoException;
 import contrato.api.model.Contrato;
 import contrato.api.model.Imovel;
 import contrato.api.repository.ContratoRepository;
@@ -35,6 +36,15 @@ public class ContratoController {
             @RequestBody @Valid DadosCadastroContrato dadosCadastroContrato, UriComponentsBuilder uriComponentsBuilder) {
         Imovel imovel = imovelRepository.getReferenceById(dadosCadastroContrato.idImovel());
         Contrato contrato = new Contrato(dadosCadastroContrato, imovel);
+        if (!imovel.getAtivo()) {
+            throw  new ValidacaoException("Imóvel inativo!");
+        }
+        List<Contrato> contratoListValidacao = contratoRepository.contratosChoqueDeDatas(
+                contrato.getDataInicio(), contrato.getDataFinalizacao(), contrato.getImovel().getId()
+        );
+        if (!contratoListValidacao.isEmpty()) {
+            throw  new ValidacaoException("Contrato com choque de datas!");
+        }
         contratoRepository.save(contrato);
         var uri = uriComponentsBuilder.path("/contratos/{id}").buildAndExpand(contrato.getId()).toUri();
         return ResponseEntity.created(uri).body(new DadosDetalhamentoContrato(contrato));
@@ -57,6 +67,13 @@ public class ContratoController {
     @Transactional
     public ResponseEntity<DadosDetalhamentoContrato> atualizar(@RequestBody @Valid DadosAtualizacaoContrato dadosAtualizacaoContrato) {
         Contrato contrato = contratoRepository.getReferenceById(dadosAtualizacaoContrato.id());
+        List<Contrato> contratoListValidacao = contratoRepository.contratosChoqueDeDatasAtualizar(
+                dadosAtualizacaoContrato.dataInico(), dadosAtualizacaoContrato.dataFinalizacao(),
+                contrato.getImovel().getId(), contrato.getId()
+        );
+        if (!contratoListValidacao.isEmpty()) {
+            throw  new ValidacaoException("Contrato com choque de datas!");
+        }
         contrato.atualizarDados(dadosAtualizacaoContrato);
         return ResponseEntity.ok(new DadosDetalhamentoContrato(contrato));
     }

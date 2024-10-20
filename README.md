@@ -370,6 +370,12 @@ Pra que não fosse feita uma configuração de tratamento de erros diferente par
  Configurações de controle de acesso:
  - **permissão de acesso sem autenticação:** POST "/login"
  - **permissão de acesso somente com autenticação:** todos os métodos de "/imoveis", "/despesas" e "contratos"
+ 
+### 9. Regras de negócio
+
+ Essa etapa consiste na configuração das regras de negócio. A regra de negócio do escritório diz que não pode existir dois contratos diferentes de um mesmo imóvel registrados em um mesmo intervalo de tempo.
+ 
+ Para implementar essa regra de negócio no sistema foi criado dois tipo de consulta JPQL utilizando SQL nativo. Uma para cadastro e outra para atualização. Essa diferença ocorre porque na consulta de cadastro o imóvel não pode chocar datas com ninguém e já na consulta de atualização o imóvel não pode chocar datas com ninguém além dele mesmo. Implementando a consulta no sistema  de cadastro e atualização, o repository retorna nulo se o cadastrou ou a atualização estiver de acordo com a regra de negócio e caso não retorne nulo a aplicação cai em uma RuntimeException.
 
  
  
