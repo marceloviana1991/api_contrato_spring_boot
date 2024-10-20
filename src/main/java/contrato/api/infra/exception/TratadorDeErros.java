@@ -1,4 +1,4 @@
-package contrato.api.infra;
+package contrato.api.infra.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;

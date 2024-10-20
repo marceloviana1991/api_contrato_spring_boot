@@ -333,4 +333,51 @@ Pra que não fosse feita uma configuração de tratamento de erros diferente par
 - **404 Not found:** EntityNotFoundException
 - **400 Bad request:** MethodArgumentNotValidException
 
+### 6. Autenticação
+
+ Nessa etapa, inicialmente, cria-se a classe CorsConfiguration para determinar as configurações de liberação de permissões para que o front-end tenha autorização para consumir a aplicação.
+ 
+ Ponteiro utilizado no arquivo src/main/resources/application.properties:
+ - ${FRONT_END_HOST}: Deve apontar para endereço IP do host e a porta onde o front-end está rodando.
+ 
+ Essa etapa consiste na implementação de dependência do spring boot voltada para a área de segurança e configuração de sistema de autenticação stateless.
+ 
+ Além das configurações de segurança é implementado uma entidade que fica responsável por registrar os logins e senhas dos usuários.
+ 
+ Vale ressaltar que o sistema implementa somente um endpoint contendo sistema de login. O sistema de login é configurado para recuperar senha criptografada por algoritmo de hashing do tipo Bcrypt. Isso implica dizer que além da criação do usuário ser responsabilidade do administrador do banco de dados, o mesmo deve criar senha criptografada por algoritmo de hashing do tipo Bcrypt para o registro ser compatível com o sistema.
+ 
+ Além de mudar a configuração do tipo de autenticação para stateless, na classe SecurityConfigurations também foi desabilitada a proteção contra ataques do tipo CSRF (Cross-Site Request Forgery). Essa configuração foi feita porque ao trabalhar com autenticação via token o próprio token é uma proteção contra esses tipos de ataque.
+ 
+ Apesar de ter sido criada uma classe que se chama AutenticacaoService responsável por determinar os parâmetros de login, o endpoint de login utiliza a classe AuthenticationManager, que já é implementada pelo próprio spring boot. Na prática a classe AuthenticationManager utiliza em  background a classe AutenticacaoService.
+ 
+### 7. Geração do token
+
+ Essa etapa consiste na implementação de um sistema de geração de token jwt utilizando biblioteca externa. A geração do token é feita após a autenticação com o objetivo de entregar ao usuário uma credencial de identificação. A configuração define tempo de expiração de token de 2 horas.
+
+ Na classe TokenService foi definida uma secret key que depende da criação de variável de ambiente:
+ - ${JWT_SECRET}: Deve apontar para uma secret key definida pelo administrador.
+ 
+ Configurações de token:
+ - **Algoritmo de decodificação:** HMAC256;
+ - **Issuer:** "API Sistema de Gerenciamento de Contrato de Aluguel de Imóveis";
+ - **Subject:** login de usuário;
+ - **Tempo de expiração:** 2 horas.
+ 
+### 8. Controle de acesso
+
+ Essa etapa consiste na configuração das regras de controle de acesso. Para a configuração das regras de controle de acesso, além das configurações feitas na classe SecurityConfigurations, utiliza-se um componente adicional SecurityFilter que herda da classe OncePerRequestFilter do springboot. A classe SecurityFilter tem o papel de barrar as requisições que não possuem um token jwt válido no cabeçalho da requisição.
+ 
+ Configurações de controle de acesso:
+ - **permissão de acesso sem autenticação:** POST "/login"
+ - **permissão de acesso somente com autenticação:** todos os métodos de "/imoveis", "/despesas" e "contratos"
+
+ 
+ 
+ 
+ 
+
+
+ 
+ 
+ 
  
